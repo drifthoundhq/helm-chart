@@ -1,9 +1,9 @@
 apiVersion: v2
 name: drifthound
 type: application
-version: 0.4.0
+version: 0.5.0
 description: A Helm chart to deploy DriftHound App on Kubernetes
-appVersion: v0.4.0
+appVersion: v0.5.0
 home: https://github.com/drifthoundhq/drifthound
 sources:
 - https://github.com/drifthoundhq/drifthound
