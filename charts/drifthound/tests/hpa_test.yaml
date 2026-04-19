@@ -1,0 +1,43 @@
+suite: hpa
+templates:
+  - templates/hpa.yaml
+
+tests:
+  - it: does not render an HPA by default
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: renders an HPA when enabled
+    set:
+      hpa:
+        enabled: true
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: HorizontalPodAutoscaler
+
+  - it: respects minReplicas and maxReplicas
+    set:
+      hpa:
+        enabled: true
+        minReplicas: 2
+        maxReplicas: 8
+    asserts:
+      - equal:
+          path: spec.minReplicas
+          value: 2
+      - equal:
+          path: spec.maxReplicas
+          value: 8
+
+  - it: respects targetCPUUtilizationPercentage
+    set:
+      hpa:
+        enabled: true
+        targetCPUUtilizationPercentage: 60
+    asserts:
+      - equal:
+          path: spec.metrics[0].resource.target.averageUtilization
+          value: 60

@@ -1,0 +1,483 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "properties": {
+    "Pdb": {
+      "additionalProperties": false,
+      "description": "Pod Disruption Budget (PDB) settings",
+      "properties": {
+        "enabled": {
+          "default": false,
+          "title": "enabled",
+          "type": "boolean"
+        },
+        "maxUnavailable": {
+          "default": null,
+          "title": "maxUnavailable",
+          "oneOf": [
+            { "type": "integer", "minimum": 0 },
+            { "type": "null" }
+          ]
+        },
+        "minAvailable": {
+          "default": 1,
+          "title": "minAvailable",
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [],
+      "title": "Pdb",
+      "type": "object"
+    },
+    "affinity": {
+      "description": "Affinity rules for pod scheduling",
+      "title": "affinity",
+      "type": "object"
+    },
+    "drifthoundConfig": {
+      "additionalProperties": { "type": "string" },
+      "description": "Configuration specific to drifthound application. Accepted values: https://github.com/drifthoundhq/DriftHound/blob/main/docs/configuration.md#application-settings",
+      "title": "drifthoundConfig",
+      "type": "object"
+    },
+    "drifthoundSecrets": {
+      "additionalProperties": { "type": "string" },
+      "description": "Configuration Secrets specific to drifthound application",
+      "title": "drifthoundSecrets",
+      "type": "object"
+    },
+    "existingSecret": {
+      "default": "",
+      "description": "Name of an existing Kubernetes Secret to use for application secrets. When set, no Secret is created by this chart and both the Deployment and migration Job reference this secret via envFrom instead.",
+      "title": "existingSecret",
+      "type": "string"
+    },
+    "fullnameOverride": {
+      "default": "",
+      "title": "fullnameOverride",
+      "type": "string"
+    },
+    "hpa": {
+      "additionalProperties": false,
+      "description": "Horizontal Pod Autoscaler (HPA) configurations",
+      "properties": {
+        "enabled": {
+          "default": false,
+          "description": "Enable or disable HPA",
+          "title": "enabled",
+          "type": "boolean"
+        },
+        "maxReplicas": {
+          "default": 10,
+          "description": "Maximum number of pods that HPA can scale up to",
+          "title": "maxReplicas",
+          "type": "integer",
+          "minimum": 1
+        },
+        "minReplicas": {
+          "default": 2,
+          "description": "Minimum number of pods that HPA should maintain",
+          "title": "minReplicas",
+          "type": "integer",
+          "minimum": 1
+        },
+        "targetCPUUtilizationPercentage": {
+          "default": 80,
+          "description": "Target CPU utilization percentage for HPA to trigger scaling",
+          "title": "targetCPUUtilizationPercentage",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        }
+      },
+      "required": [],
+      "title": "hpa",
+      "type": "object"
+    },
+    "image": {
+      "additionalProperties": false,
+      "properties": {
+        "pullPolicy": {
+          "default": "Always",
+          "description": "Docker image pull policy",
+          "title": "pullPolicy",
+          "type": "string",
+          "enum": ["Always", "IfNotPresent", "Never"]
+        },
+        "repository": {
+          "default": "ghcr.io/drifthoundhq/drifthound",
+          "description": "Docker image repository",
+          "title": "repository",
+          "type": "string"
+        },
+        "tag": {
+          "description": "Docker image tag (defaults to chart appVersion)",
+          "title": "tag",
+          "type": "string"
+        }
+      },
+      "required": [],
+      "title": "image",
+      "type": "object"
+    },
+    "imagePullSecrets": {
+      "description": "List of image pull secrets for private repositories",
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string" }
+        },
+        "required": ["name"],
+        "type": "object"
+      },
+      "title": "imagePullSecrets",
+      "type": "array"
+    },
+    "ingress": {
+      "additionalProperties": false,
+      "description": "Ingress configurations",
+      "properties": {
+        "annotations": {
+          "additionalProperties": { "type": "string" },
+          "description": "Ingress Annotations",
+          "title": "annotations",
+          "type": "object"
+        },
+        "className": {
+          "default": "nginx",
+          "description": "Ingress ClassName",
+          "title": "className",
+          "type": "string"
+        },
+        "enabled": {
+          "default": false,
+          "description": "Enable or disable Ingress",
+          "title": "enabled",
+          "type": "boolean"
+        },
+        "hosts": {
+          "description": "Hostnames for the Ingress",
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "host": { "type": "string" },
+              "paths": {
+                "items": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "path": { "type": "string" },
+                    "pathType": {
+                      "type": "string",
+                      "enum": ["Prefix", "Exact", "ImplementationSpecific"]
+                    }
+                  },
+                  "required": ["path", "pathType"],
+                  "type": "object"
+                },
+                "type": "array"
+              }
+            },
+            "required": ["host"],
+            "type": "object"
+          },
+          "title": "hosts",
+          "type": "array"
+        },
+        "tls": {
+          "description": "TLS configuration for the Ingress",
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "hosts": {
+                "items": { "type": "string" },
+                "type": "array"
+              },
+              "secretName": { "type": "string" }
+            },
+            "type": "object"
+          },
+          "title": "tls",
+          "type": "array"
+        }
+      },
+      "required": [],
+      "title": "ingress",
+      "type": "object"
+    },
+    "migrations": {
+      "additionalProperties": false,
+      "description": "Database migrations job configuration",
+      "properties": {
+        "activeDeadlineSeconds": {
+          "default": 600,
+          "description": "Maximum duration (in seconds) for the job to complete",
+          "title": "activeDeadlineSeconds",
+          "type": "integer",
+          "minimum": 1
+        },
+        "backoffLimit": {
+          "default": 3,
+          "description": "Number of retries before considering the job as failed",
+          "title": "backoffLimit",
+          "type": "integer",
+          "minimum": 0
+        },
+        "command": {
+          "description": "Database migration job command",
+          "items": { "type": "string" },
+          "title": "command",
+          "type": "array"
+        },
+        "enabled": {
+          "default": true,
+          "description": "Enable or disable database migrations job",
+          "title": "enabled",
+          "type": "boolean"
+        }
+      },
+      "required": [],
+      "title": "migrations",
+      "type": "object"
+    },
+    "nameOverride": {
+      "default": "",
+      "description": "Overrides for chart name (helpful when you want to change the default resource names)",
+      "title": "nameOverride",
+      "type": "string"
+    },
+    "nodeSelector": {
+      "additionalProperties": { "type": "string" },
+      "description": "Node selector for pod scheduling",
+      "title": "nodeSelector",
+      "type": "object"
+    },
+    "podAnnotations": {
+      "additionalProperties": { "type": "string" },
+      "description": "Annotations to add to the pod",
+      "title": "podAnnotations",
+      "type": "object"
+    },
+    "podSecurityContext": {
+      "description": "Security context for all containers in the pod",
+      "title": "podSecurityContext",
+      "type": "object"
+    },
+    "probes": {
+      "additionalProperties": false,
+      "description": "Probes for checking the health of the application",
+      "properties": {
+        "livenessProbe": {
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "default": true,
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "initialDelaySeconds": {
+              "default": 15,
+              "title": "initialDelaySeconds",
+              "type": "integer",
+              "minimum": 0
+            },
+            "path": {
+              "default": "/up",
+              "title": "path",
+              "type": "string"
+            },
+            "periodSeconds": {
+              "default": 20,
+              "title": "periodSeconds",
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "required": [],
+          "title": "livenessProbe",
+          "type": "object"
+        },
+        "readinessProbe": {
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "default": true,
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "initialDelaySeconds": {
+              "default": 5,
+              "title": "initialDelaySeconds",
+              "type": "integer",
+              "minimum": 0
+            },
+            "path": {
+              "default": "/up",
+              "title": "path",
+              "type": "string"
+            },
+            "periodSeconds": {
+              "default": 10,
+              "title": "periodSeconds",
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "required": [],
+          "title": "readinessProbe",
+          "type": "object"
+        },
+        "startupProbe": {
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "default": true,
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "initialDelaySeconds": {
+              "default": 10,
+              "title": "initialDelaySeconds",
+              "type": "integer",
+              "minimum": 0
+            },
+            "path": {
+              "default": "/up",
+              "title": "path",
+              "type": "string"
+            },
+            "periodSeconds": {
+              "default": 5,
+              "title": "periodSeconds",
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "required": [],
+          "title": "startupProbe",
+          "type": "object"
+        }
+      },
+      "required": [],
+      "title": "probes",
+      "type": "object"
+    },
+    "replicaCount": {
+      "default": 1,
+      "description": "The number of replicas to deploy for the application",
+      "title": "replicaCount",
+      "type": "integer",
+      "minimum": 0
+    },
+    "resources": {
+      "description": "Resources requests and limits",
+      "title": "resources",
+      "type": "object"
+    },
+    "rollingUpdate": {
+      "additionalProperties": false,
+      "description": "Rolling update strategy",
+      "properties": {
+        "maxSurge": {
+          "default": 1,
+          "description": "The maximum number of pods that can be created over the desired number of pods",
+          "title": "maxSurge",
+          "oneOf": [
+            { "type": "integer", "minimum": 0 },
+            { "type": "string", "pattern": "^[0-9]+%$" }
+          ]
+        },
+        "maxUnavailable": {
+          "default": 1,
+          "description": "The maximum number of pods that can be unavailable during the update process",
+          "title": "maxUnavailable",
+          "oneOf": [
+            { "type": "integer", "minimum": 0 },
+            { "type": "string", "pattern": "^[0-9]+%$" }
+          ]
+        }
+      },
+      "required": [],
+      "title": "rollingUpdate",
+      "type": "object"
+    },
+    "securityContext": {
+      "description": "Security context for the pod",
+      "title": "securityContext",
+      "type": "object"
+    },
+    "service": {
+      "additionalProperties": false,
+      "description": "Service configurations",
+      "properties": {
+        "port": {
+          "default": 80,
+          "description": "Service port exposed",
+          "title": "port",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535
+        },
+        "targetPort": {
+          "default": 8080,
+          "description": "Container port to which the service will send traffic",
+          "title": "targetPort",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535
+        },
+        "type": {
+          "default": "ClusterIP",
+          "description": "Kubernetes Service type",
+          "title": "type",
+          "type": "string",
+          "enum": ["ClusterIP", "NodePort", "LoadBalancer", "ExternalName"]
+        }
+      },
+      "required": [],
+      "title": "service",
+      "type": "object"
+    },
+    "serviceAccount": {
+      "additionalProperties": false,
+      "description": "Service account configurations",
+      "properties": {
+        "annotations": {
+          "additionalProperties": { "type": "string" },
+          "description": "Annotations to add to the service account",
+          "title": "annotations",
+          "type": "object"
+        },
+        "enabled": {
+          "default": false,
+          "description": "Specifies whether a service account should be created",
+          "title": "enabled",
+          "type": "boolean"
+        }
+      },
+      "required": [],
+      "title": "serviceAccount",
+      "type": "object"
+    },
+    "tolerations": {
+      "description": "Tolerations for pod scheduling",
+      "items": { "type": "object" },
+      "title": "tolerations",
+      "type": "array"
+    },
+    "volumes": {
+      "description": "Additional volumes to attach to the pod",
+      "items": { "type": "object" },
+      "title": "volumes",
+      "type": "array"
+    },
+    "volumeMounts": {
+      "description": "Additional volume mounts for the container",
+      "items": { "type": "object" },
+      "title": "volumeMounts",
+      "type": "array"
+    }
+  },
+  "required": [],
+  "type": "object"
+}

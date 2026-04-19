@@ -1,0 +1,34 @@
+suite: ingress
+templates:
+  - templates/ingress.yaml
+
+tests:
+  - it: does not render an Ingress by default
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: renders an Ingress when enabled
+    set:
+      ingress:
+        enabled: true
+        hosts:
+          - host: drifthound.example.com
+            paths:
+              - path: /
+                pathType: Prefix
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: Ingress
+
+  - it: uses the configured className
+    set:
+      ingress:
+        enabled: true
+        className: traefik
+    asserts:
+      - equal:
+          path: spec.ingressClassName
+          value: traefik
