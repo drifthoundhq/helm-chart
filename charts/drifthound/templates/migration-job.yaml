@@ -42,13 +42,16 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
             {{- toYaml .Values.migrations.command | nindent 12 }}
-          {{- if or (.Values.drifthoundConfig) (.Values.drifthoundSecrets) }}
+          {{- if or (.Values.drifthoundConfig) (.Values.drifthoundSecrets) (.Values.existingSecret) }}
           envFrom:
             {{- if .Values.drifthoundConfig }}
             - configMapRef:
                 name: {{ include "drifthound.fullname" . }}
             {{- end }}
-            {{- if .Values.drifthoundSecrets }}
+            {{- if .Values.existingSecret }}
+            - secretRef:
+                name: {{ .Values.existingSecret }}
+            {{- else if .Values.drifthoundSecrets }}
             - secretRef:
                 name: {{ include "drifthound.fullname" . }}
             {{- end }}
