@@ -1,0 +1,123 @@
+suite: deployment
+templates:
+  - templates/deployment.yaml
+
+tests:
+  - it: renders a Deployment by default
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: Deployment
+
+  - it: uses the correct replica count
+    set:
+      replicaCount: 3
+    asserts:
+      - equal:
+          path: spec.replicas
+          value: 3
+
+  - it: has no envFrom when no config or secrets are set
+    asserts:
+      - isNull:
+          path: spec.template.spec.containers[0].envFrom
+
+  - it: adds configMapRef to envFrom when drifthoundConfig is set
+    set:
+      drifthoundConfig:
+        RAILS_ENV: production
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].envFrom
+          content:
+            configMapRef:
+              name: RELEASE-NAME-drifthound
+
+  - it: adds secretRef pointing to chart-managed Secret when drifthoundSecrets is set
+    set:
+      drifthoundSecrets:
+        SECRET_KEY_BASE: abc123
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].envFrom
+          content:
+            secretRef:
+              name: RELEASE-NAME-drifthound
+
+  - it: adds secretRef pointing to existingSecret when existingSecret is set
+    set:
+      existingSecret: my-external-secret
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].envFrom
+          content:
+            secretRef:
+              name: my-external-secret
+
+  - it: prefers existingSecret over drifthoundSecrets when both are set
+    set:
+      existingSecret: my-external-secret
+      drifthoundSecrets:
+        SECRET_KEY_BASE: abc123
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].envFrom
+          content:
+            secretRef:
+              name: my-external-secret
+      - notContains:
+          path: spec.template.spec.containers[0].envFrom
+          content:
+            secretRef:
+              name: RELEASE-NAME-drifthound
+
+  - it: includes checksum/secret annotation when drifthoundSecrets is set
+    set:
+      drifthoundSecrets:
+        SECRET_KEY_BASE: abc123
+    asserts:
+      - isNotNull:
+          path: spec.template.metadata.annotations["checksum/secret"]
+
+  - it: does not include checksum/secret annotation when existingSecret is set
+    set:
+      existingSecret: my-external-secret
+    asserts:
+      - isNull:
+          path: spec.template.metadata.annotations["checksum/secret"]
+
+  - it: does not include checksum/secret annotation when existingSecret overrides drifthoundSecrets
+    set:
+      existingSecret: my-external-secret
+      drifthoundSecrets:
+        SECRET_KEY_BASE: abc123
+    asserts:
+      - isNull:
+          path: spec.template.metadata.annotations["checksum/secret"]
+
+  - it: respects fullnameOverride
+    set:
+      fullnameOverride: custom-name
+    asserts:
+      - equal:
+          path: metadata.name
+          value: custom-name
+
+  - it: mounts configMapRef and secretRef together when both are set
+    set:
+      drifthoundConfig:
+        RAILS_ENV: production
+      drifthoundSecrets:
+        SECRET_KEY_BASE: abc123
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].envFrom
+          content:
+            configMapRef:
+              name: RELEASE-NAME-drifthound
+      - contains:
+          path: spec.template.spec.containers[0].envFrom
+          content:
+            secretRef:
+              name: RELEASE-NAME-drifthound

@@ -1,0 +1,103 @@
+suite: migration-job
+templates:
+  - templates/migration-job.yaml
+
+tests:
+  - it: does not render a Job when migrations are disabled
+    set:
+      migrations:
+        enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: renders a Job when migrations are enabled
+    set:
+      migrations:
+        enabled: true
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: Job
+
+  - it: has no envFrom when no config or secrets are set
+    set:
+      migrations:
+        enabled: true
+    asserts:
+      - isNull:
+          path: spec.template.spec.containers[0].envFrom
+
+  - it: adds secretRef pointing to chart-managed Secret when drifthoundSecrets is set
+    set:
+      migrations:
+        enabled: true
+      drifthoundSecrets:
+        SECRET_KEY_BASE: abc123
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].envFrom
+          content:
+            secretRef:
+              name: RELEASE-NAME-drifthound
+
+  - it: adds secretRef pointing to existingSecret when existingSecret is set
+    set:
+      migrations:
+        enabled: true
+      existingSecret: my-external-secret
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].envFrom
+          content:
+            secretRef:
+              name: my-external-secret
+
+  - it: prefers existingSecret over drifthoundSecrets when both are set
+    set:
+      migrations:
+        enabled: true
+      existingSecret: my-external-secret
+      drifthoundSecrets:
+        SECRET_KEY_BASE: abc123
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].envFrom
+          content:
+            secretRef:
+              name: my-external-secret
+      - notContains:
+          path: spec.template.spec.containers[0].envFrom
+          content:
+            secretRef:
+              name: RELEASE-NAME-drifthound
+
+  - it: adds hook annotations
+    set:
+      migrations:
+        enabled: true
+    asserts:
+      - equal:
+          path: metadata.annotations["helm.sh/hook"]
+          value: pre-install,pre-upgrade
+
+  - it: respects backoffLimit
+    set:
+      migrations:
+        enabled: true
+        backoffLimit: 5
+    asserts:
+      - equal:
+          path: spec.backoffLimit
+          value: 5
+
+  - it: respects activeDeadlineSeconds
+    set:
+      migrations:
+        enabled: true
+        activeDeadlineSeconds: 300
+    asserts:
+      - equal:
+          path: spec.activeDeadlineSeconds
+          value: 300
