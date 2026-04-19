@@ -1,6 +1,6 @@
 # drifthound
 
-![Version: 0.5.1](https://img.shields.io/badge/Version-0.5.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.5.1](https://img.shields.io/badge/AppVersion-v0.5.1-informational?style=flat-square)
+![Version: 0.5.2](https://img.shields.io/badge/Version-0.5.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.5.1](https://img.shields.io/badge/AppVersion-v0.5.1-informational?style=flat-square)
 
 A Helm chart to deploy DriftHound App on Kubernetes
 
@@ -18,6 +18,7 @@ A Helm chart to deploy DriftHound App on Kubernetes
 | affinity | object | `{}` | Affinity rules for pod scheduling |
 | drifthoundConfig | object | `{}` | Configuration specific to drifthound application. Accepted values: https://github.com/drifthoundhq/DriftHound/blob/main/docs/configuration.md#application-settings |
 | drifthoundSecrets | object | `{}` | Configuration Secrets specific to drifthound application |
+| existingSecret | string | `""` | Name of an existing Kubernetes Secret to use for application secrets. When set, no Secret is created by this chart and both the Deployment and migration Job reference this secret via envFrom instead. |
 | fullnameOverride | string | `""` |  |
 | hpa | object | `{"enabled":false,"maxReplicas":10,"minReplicas":2,"targetCPUUtilizationPercentage":80}` | Horizontal Pod Autoscaler (HPA) configurations |
 | hpa.enabled | bool | `false` | Enable or disable HPA |
