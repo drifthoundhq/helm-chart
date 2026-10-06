@@ -2,6 +2,19 @@ apiVersion: v1
 entries:
   drifthound:
   - apiVersion: v2
+    appVersion: v0.9.0
+    created: "2026-10-06T20:58:26.901983525Z"
+    description: A Helm chart to deploy DriftHound App on Kubernetes
+    digest: 05ea1977943c0bc33fd8b3619eb8bb40d579ff9ba1b6b0a9c54850c23e3e3e7e
+    home: https://github.com/drifthoundhq/drifthound
+    name: drifthound
+    sources:
+    - https://github.com/drifthoundhq/drifthound
+    type: application
+    urls:
+    - https://github.com/drifthoundhq/helm-chart/releases/download/drifthound-0.9.0/drifthound-0.9.0.tgz
+    version: 0.9.0
+  - apiVersion: v2
     appVersion: v0.8.0
     created: "2026-10-02T06:31:58.636133819Z"
     description: A Helm chart to deploy DriftHound App on Kubernetes
@@ -274,4 +287,4 @@ entries:
     urls:
     - https://github.com/treezio/helm-chart-drifthound/releases/download/drifthound-0.1.0/drifthound-0.1.0.tgz
     version: 0.1.0
-generated: "2026-10-02T06:31:58.636256471Z"
+generated: "2026-10-06T20:58:26.902112035Z"
