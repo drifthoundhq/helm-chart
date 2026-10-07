@@ -58,6 +58,11 @@
       "title": "fullnameOverride",
       "type": "string"
     },
+    "global": {
+      "description": "Global values Helm passes down when this chart is used as a dependency",
+      "title": "global",
+      "type": "object"
+    },
     "hpa": {
       "additionalProperties": false,
       "description": "Horizontal Pod Autoscaler (HPA) configurations",

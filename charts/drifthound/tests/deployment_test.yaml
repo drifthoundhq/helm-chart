@@ -10,6 +10,14 @@ tests:
       - isKind:
           of: Deployment
 
+  - it: accepts global values passed down by a parent chart
+    set:
+      global:
+        imageRegistry: registry.example.com
+    asserts:
+      - hasDocuments:
+          count: 1
+
   - it: uses the correct replica count
     set:
       replicaCount: 3
